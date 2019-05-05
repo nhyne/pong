@@ -57,7 +57,7 @@ impl Ball {
            x_pos,
             y_pos,
             shape: Rectangle::new(BLACK),
-            x_velocity: 1.0,
+            x_velocity: 0.05,
             y_velocity: 0.0,
         }
     }
@@ -93,7 +93,6 @@ fn main() {
         .build()
         .unwrap();
 
-    window.set_lazy(true);
     while let Some(e) = window.next() {
         ball.update_pos();
         window.draw_2d(&e, |context, graphics| {
@@ -103,7 +102,6 @@ fn main() {
             player_2.draw(&context.draw_state, context.transform, graphics);
             ball.draw(&context.draw_state, context.transform, graphics);
         });
-
 
         // these things should be async, they're blocking
         if let Some(Button::Keyboard(Key::A)) = e.press_args() {
