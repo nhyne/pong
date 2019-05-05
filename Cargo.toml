@@ -6,4 +6,7 @@ edition = "2018"
 
 [dependencies]
 piston_window = "0.89.0"
-find_folder = "0.3.0"
+find_folder   = "0.3.0"
+ncollide2d    = "0.19.1"
+nalgebra      = "0.18"
+nphysics2d    = "0.11.1"

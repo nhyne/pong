@@ -1,8 +1,18 @@
 extern crate piston_window;
 extern crate find_folder;
+extern crate nalgebra as na;
+extern crate ncollide2d;
+extern crate nphysics2d;
 
 use piston_window::*;
 use math::Matrix2d;
+
+use na::{Point2, Vector2};
+use ncollide2d::math::Isometry;
+use ncollide2d::shape::{Ball, ShapeHandle};
+use nphysics2d::object::{ColliderDesc, RigidBodyDesc};
+use nphysics2d::world::World;
+use nphysics2d::algebra::Velocity2;
 
 const BLACK: [f32;4] = [0.0, 0.0, 0.0, 1.0];
 const PLAYER_WIDTH: f64 = 15.0;
@@ -43,28 +53,23 @@ impl Player {
     }
 }
 
-struct Ball {
+struct PongBall {
     x_pos: f64,
     y_pos: f64,
-    x_velocity: f64,
-    y_velocity: f64,
     shape: Rectangle,
+    physics_velocity: Velocity2<f64>,
+    physics_shape: ColliderDesc<f64>,
 }
 
-impl Ball {
-    fn new(x_pos: f64, y_pos: f64) -> Ball {
-        Ball {
+impl PongBall {
+    fn new(x_pos: f64, y_pos: f64) -> PongBall {
+        PongBall {
            x_pos,
             y_pos,
             shape: Rectangle::new(BLACK),
-            x_velocity: 0.05,
-            y_velocity: 0.0,
+            physics_velocity: Velocity2::linear(0.05, 0.0),
+            physics_shape: ColliderDesc::new(ShapeHandle::new(Ball::new(BALL_SIZE))),
         }
-    }
-
-    fn update_pos(&mut self) {
-        self.x_pos += self.x_velocity;
-        self.y_pos += self.y_velocity;
     }
 
     fn draw<G> (&self, draw_state: &DrawState, transform: Matrix2d, graphics: &mut G)
@@ -82,7 +87,15 @@ fn main() {
 
     let mut player_1 = Player::new(50.0, 380.0);
     let mut player_2 = Player::new(750.0, 380.0);
-    let mut ball = Ball::new(400.0, 400.0);
+    let mut ball = PongBall::new(400.0, 400.0);
+
+    let mut rb_desc = RigidBodyDesc::new()
+        .collider(&ball.physics_shape)
+        .velocity(ball.physics_velocity);
+
+    let mut world : World<f64> = World::new();
+
+    rb_desc.build(&mut world);
 
     let mut window: PistonWindow = WindowSettings::new(
         "piston: draw_state",
@@ -94,22 +107,13 @@ fn main() {
         .unwrap();
 
     while let Some(e) = window.next() {
-        ball.update_pos();
-        window.draw_2d(&e, |context, graphics| {
-            clear([0.8, 0.8, 0.8, 1.0], graphics);
-            graphics.clear_stencil(0);
-            player_1.draw(&context.draw_state, context.transform, graphics);
-            player_2.draw(&context.draw_state, context.transform, graphics);
-            ball.draw(&context.draw_state, context.transform, graphics);
-        });
-
         // these things should be async, they're blocking
         if let Some(Button::Keyboard(Key::A)) = e.press_args() {
             player_1.move_down()
         }
 
         if let Some(Button::Keyboard(Key::S)) = e.press_args() {
-           player_1.move_up()
+            player_1.move_up()
         }
 
         if let Some(Button::Keyboard(Key::K)) = e.press_args() {
@@ -118,6 +122,16 @@ fn main() {
         if let Some(Button::Keyboard(Key::L)) = e.press_args() {
             player_2.move_down()
         }
+
+        world.step();
+
+        window.draw_2d(&e, |context, graphics| {
+            clear([0.8, 0.8, 0.8, 1.0], graphics);
+            graphics.clear_stencil(0);
+            player_1.draw(&context.draw_state, context.transform, graphics);
+            player_2.draw(&context.draw_state, context.transform, graphics);
+            ball.draw(&context.draw_state, context.transform, graphics);
+        });
 
     }
 }
