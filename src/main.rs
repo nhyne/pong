@@ -17,7 +17,6 @@ struct Player {
 }
 
 impl Player {
-
     fn draw<G>(&self, draw_state: &DrawState, transform: Matrix2d, graphics: &mut G)
         where G: Graphics {
             self.shape.draw(
@@ -27,7 +26,6 @@ impl Player {
                 graphics,
             )
         }
-
 
     fn new(x_pos: f64, y_pos: f64) -> Player {
         Player {
@@ -48,7 +46,8 @@ impl Player {
 
 fn main() {
 
-    let mut player_1 = Player::new(0.0, 0.0);
+    let mut player_1 = Player::new(50.0, 380.0);
+    let mut player_2 = Player::new(750.0, 380.0);
 
     let mut window: PistonWindow = WindowSettings::new(
         "piston: draw_state",
@@ -70,7 +69,7 @@ fn main() {
             let empty_transform = context.transform.trans(0.0, 0.0);
             let draw_state = context.draw_state.blend(blends[blend]);
             player_1.draw(&draw_state, empty_transform, graphics);
-
+            player_2.draw(&draw_state, empty_transform, graphics);
         });
 
 
@@ -81,6 +80,13 @@ fn main() {
 
         if let Some(Button::Keyboard(Key::S)) = e.press_args() {
            player_1.move_up()
+        }
+
+        if let Some(Button::Keyboard(Key::K)) = e.press_args() {
+            player_2.move_up()
+        }
+        if let Some(Button::Keyboard(Key::L)) = e.press_args() {
+            player_2.move_down()
         }
     }
 }
