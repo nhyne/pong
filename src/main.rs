@@ -1,14 +1,13 @@
 extern crate piston_window;
 extern crate find_folder;
 
-use piston_window::draw_state::Blend;
 use piston_window::*;
-
 use math::Matrix2d;
 
 const BLACK: [f32;4] = [0.0, 0.0, 0.0, 1.0];
 const PLAYER_WIDTH: f64 = 15.0;
 const PLAYER_HEIGHT: f64 = 50.0;
+const BALL_SIZE: f64 = 20.0;
 
 struct Player {
     x_pos: f64,
@@ -44,10 +43,46 @@ impl Player {
     }
 }
 
+struct Ball {
+    x_pos: f64,
+    y_pos: f64,
+    x_velocity: f64,
+    y_velocity: f64,
+    shape: Rectangle,
+}
+
+impl Ball {
+    fn new(x_pos: f64, y_pos: f64) -> Ball {
+        Ball {
+           x_pos,
+            y_pos,
+            shape: Rectangle::new(BLACK),
+            x_velocity: 1.0,
+            y_velocity: 0.0,
+        }
+    }
+
+    fn update_pos(&mut self) {
+        self.x_pos += self.x_velocity;
+        self.y_pos += self.y_velocity;
+    }
+
+    fn draw<G> (&self, draw_state: &DrawState, transform: Matrix2d, graphics: &mut G)
+        where G: Graphics {
+        self.shape.draw(
+            [self.x_pos, self.y_pos, BALL_SIZE, BALL_SIZE],
+            draw_state,
+            transform,
+            graphics
+        )
+    }
+}
+
 fn main() {
 
     let mut player_1 = Player::new(50.0, 380.0);
     let mut player_2 = Player::new(750.0, 380.0);
+    let mut ball = Ball::new(400.0, 400.0);
 
     let mut window: PistonWindow = WindowSettings::new(
         "piston: draw_state",
@@ -58,18 +93,15 @@ fn main() {
         .build()
         .unwrap();
 
-    let blends = [Blend::Alpha, Blend::Add, Blend::Invert, Blend::Multiply];
-    let blend = 0;
-
     window.set_lazy(true);
     while let Some(e) = window.next() {
+        ball.update_pos();
         window.draw_2d(&e, |context, graphics| {
             clear([0.8, 0.8, 0.8, 1.0], graphics);
             graphics.clear_stencil(0);
-            let empty_transform = context.transform.trans(0.0, 0.0);
-            let draw_state = context.draw_state.blend(blends[blend]);
-            player_1.draw(&draw_state, empty_transform, graphics);
-            player_2.draw(&draw_state, empty_transform, graphics);
+            player_1.draw(&context.draw_state, context.transform, graphics);
+            player_2.draw(&context.draw_state, context.transform, graphics);
+            ball.draw(&context.draw_state, context.transform, graphics);
         });
 
 
@@ -88,5 +120,6 @@ fn main() {
         if let Some(Button::Keyboard(Key::L)) = e.press_args() {
             player_2.move_down()
         }
+
     }
 }
