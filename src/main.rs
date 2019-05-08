@@ -7,17 +7,59 @@ extern crate nphysics2d;
 use piston_window::*;
 use math::Matrix2d;
 
-use na::{Point2, Vector2};
-use ncollide2d::math::Isometry;
+use na::{Point2, Vector2, Isometry2};
 use ncollide2d::shape::{Ball, ShapeHandle};
-use nphysics2d::object::{ColliderDesc, RigidBodyDesc};
+use nphysics2d::object::{ColliderDesc, RigidBodyDesc, RigidBody, BodyHandle};
 use nphysics2d::world::World;
 use nphysics2d::algebra::Velocity2;
+use core::borrow::Borrow;
 
 const BLACK: [f32;4] = [0.0, 0.0, 0.0, 1.0];
 const PLAYER_WIDTH: f64 = 15.0;
 const PLAYER_HEIGHT: f64 = 50.0;
 const BALL_SIZE: f64 = 20.0;
+
+struct Game {
+    world: World<f64>,
+    ball: Vec<PongBall>,
+}
+
+impl Game {
+    fn new() -> Game {
+        let mut world : World<f64> = World::new();
+        Game {
+            world,
+            ball: Vec::with_capacity(1),
+        }
+    }
+
+    fn init(&mut self) {
+        let ball_shape = ShapeHandle::new(Ball::new(BALL_SIZE));
+        let ball_collider = ColliderDesc::new(ball_shape);
+
+        let mut rb_desc = RigidBodyDesc::new()
+            .collider(&ball_collider)
+            .velocity(Velocity2::linear(0.05, 0.0));
+
+        let rigid_body = rb_desc.build(&mut self.world);
+        let ball_handle = rigid_body.handle();
+
+        let ball = PongBall::new(ball_handle);
+        self.ball.push(ball);
+    }
+
+    fn update(&mut self) {
+        self.world.step();
+    }
+
+    fn render<G> (&self, context: Context, graphics: &mut G)
+        where G: Graphics {
+        clear([0.8, 0.8, 0.8, 1.0], graphics);
+        graphics.clear_stencil(0);
+
+        self.ball[0].draw(context, graphics, &self.world);
+    }
+}
 
 struct Player {
     x_pos: f64,
@@ -54,48 +96,44 @@ impl Player {
 }
 
 struct PongBall {
-    x_pos: f64,
-    y_pos: f64,
     shape: Rectangle,
-    physics_velocity: Velocity2<f64>,
-    physics_shape: ColliderDesc<f64>,
+    body: BodyHandle,
 }
 
 impl PongBall {
-    fn new(x_pos: f64, y_pos: f64) -> PongBall {
+    fn new(body: BodyHandle) -> PongBall {
         PongBall {
-           x_pos,
-            y_pos,
             shape: Rectangle::new(BLACK),
-            physics_velocity: Velocity2::linear(0.05, 0.0),
-            physics_shape: ColliderDesc::new(ShapeHandle::new(Ball::new(BALL_SIZE))),
+            body,
         }
     }
 
-    fn draw<G> (&self, draw_state: &DrawState, transform: Matrix2d, graphics: &mut G)
+    fn draw<G> (&self, context: Context, graphics: &mut G, world: &World<f64>)
         where G: Graphics {
-        self.shape.draw(
-            [self.x_pos, self.y_pos, BALL_SIZE, BALL_SIZE],
-            draw_state,
-            transform,
-            graphics
-        )
+        let body = world.rigid_body(self.body);
+        match body {
+            None => {},
+            Some(b) => {
+                let pos = na::Point2::translation(b.position());
+                self.shape.draw(
+                    [pos.x, pos.y, BALL_SIZE, BALL_SIZE],
+                    &context.draw_state,
+                    context.transform,
+                    graphics
+                );
+            }
+        }
     }
 }
 
 fn main() {
 
-    let mut player_1 = Player::new(50.0, 380.0);
-    let mut player_2 = Player::new(750.0, 380.0);
-    let mut ball = PongBall::new(400.0, 400.0);
+    //let mut player_1 = Player::new(50.0, 380.0);
+    //let mut player_2 = Player::new(750.0, 380.0);
 
-    let mut rb_desc = RigidBodyDesc::new()
-        .collider(&ball.physics_shape)
-        .velocity(ball.physics_velocity);
 
-    let mut world : World<f64> = World::new();
-
-    rb_desc.build(&mut world);
+    let mut game = Game::new();
+    game.init();
 
     let mut window: PistonWindow = WindowSettings::new(
         "piston: draw_state",
@@ -108,29 +146,27 @@ fn main() {
 
     while let Some(e) = window.next() {
         // these things should be async, they're blocking
-        if let Some(Button::Keyboard(Key::A)) = e.press_args() {
-            player_1.move_down()
-        }
+        //if let Some(Button::Keyboard(Key::A)) = e.press_args() {
+        //    player_1.move_down()
+        //}
 
-        if let Some(Button::Keyboard(Key::S)) = e.press_args() {
-            player_1.move_up()
-        }
+        //if let Some(Button::Keyboard(Key::S)) = e.press_args() {
+        //    player_1.move_up()
+        //}
 
-        if let Some(Button::Keyboard(Key::K)) = e.press_args() {
-            player_2.move_up()
-        }
-        if let Some(Button::Keyboard(Key::L)) = e.press_args() {
-            player_2.move_down()
-        }
+        //if let Some(Button::Keyboard(Key::K)) = e.press_args() {
+        //    player_2.move_up()
+        //}
+        //if let Some(Button::Keyboard(Key::L)) = e.press_args() {
+        //    player_2.move_down()
+        //}
 
-        world.step();
+        game.update();
 
         window.draw_2d(&e, |context, graphics| {
-            clear([0.8, 0.8, 0.8, 1.0], graphics);
-            graphics.clear_stencil(0);
-            player_1.draw(&context.draw_state, context.transform, graphics);
-            player_2.draw(&context.draw_state, context.transform, graphics);
-            ball.draw(&context.draw_state, context.transform, graphics);
+            game.render(context, graphics);
+            //player_1.draw(&context.draw_state, context.transform, graphics);
+            //player_2.draw(&context.draw_state, context.transform, graphics);
         });
 
     }
