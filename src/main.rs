@@ -1,15 +1,15 @@
 extern crate piston_window;
 extern crate find_folder;
-extern crate nalgebra as na;
+extern crate nalgebra;
 extern crate ncollide2d;
 extern crate nphysics2d;
 
 use piston_window::*;
 use math::Matrix2d;
 
-use na::{Point2, Vector2, Isometry2};
+use nalgebra::{Point2, Vector2, Isometry2};
 use ncollide2d::shape::{Ball, ShapeHandle};
-use nphysics2d::object::{ColliderDesc, RigidBodyDesc, RigidBody, BodyHandle};
+use nphysics2d::object::{ColliderDesc, RigidBodyDesc, BodyHandle};
 use nphysics2d::world::World;
 use nphysics2d::algebra::Velocity2;
 use core::borrow::Borrow;
@@ -114,9 +114,10 @@ impl PongBall {
         match body {
             None => {},
             Some(b) => {
-                let pos = na::Point2::translation(b.position());
+                let ball_body = b.borrow();
+                let pos = ball_body.position().translation.vector;
                 self.shape.draw(
-                    [pos.x, pos.y, BALL_SIZE, BALL_SIZE],
+                    [pos[0], pos[1], BALL_SIZE, BALL_SIZE],
                     &context.draw_state,
                     context.transform,
                     graphics
@@ -160,6 +161,8 @@ fn main() {
         //if let Some(Button::Keyboard(Key::L)) = e.press_args() {
         //    player_2.move_down()
         //}
+
+        //println!("{}", game.world.timestep());
 
         game.update();
 
