@@ -15,6 +15,19 @@ use nphysics2d::world::World;
 use nphysics2d::algebra::Velocity2;
 use nphysics2d::material::{MaterialHandle, BasicMaterial};
 
+const BLACK: [f32;4] = [0.0, 0.0, 0.0, 1.0];
+
+const WALL_DRAW_LENGTH: f64 = 800.0;
+const WALL_DRAW_HEIGHT: f64 = 20.0;
+const WALL_BODY_LENGTH: f64 = 400.0;
+const WALL_BODY_HEIGHT: f64 = 0.5;
+
+const TOP_WALL_X_POSITION: f64 = 0.0;
+const TOP_WALL_Y_POSITION: f64 = 0.0;
+const BOTTOM_WALL_X_POSITION: f64 = 0.0;
+const BOTTOM_WALL_Y_POSITION: f64 = 400.0;
+
+
 pub struct Game {
     world: World<f64>,
     ball: Vec<ball::PongBall>,
@@ -40,6 +53,7 @@ impl Game {
 
         let mut rb_desc = RigidBodyDesc::new()
             .collider(&ball_collider)
+            .position(Isometry2::translation(50.0, 50.0))
             .velocity(Velocity2::linear(ball::BALL_HORIZONTAL_SPEED, ball::BALL_VERTICAL_SPEED));
 
         let rigid_body = rb_desc.build(&mut self.world);
@@ -75,6 +89,7 @@ impl Game {
         self.players.push(player_one);
         self.players.push(player_two);
 
+        self.init_walls();
     }
 
     pub fn update(&mut self) {
@@ -82,7 +97,7 @@ impl Game {
     }
 
     pub fn render<G> (&self, context: Context, graphics: &mut G)
-        where G: Graphics {
+    where G: Graphics {
         clear([0.8, 0.8, 0.8, 1.0], graphics);
         graphics.clear_stencil(0);
 
@@ -91,5 +106,40 @@ impl Game {
         for player in &self.players {
             player.render(context, graphics, &self.world);
         }
+
+        self.render_walls(context, graphics)
+    }
+
+    fn init_walls(&mut self) {
+
+        let wall_shape = ShapeHandle::new(Cuboid::new(Vector2::new(WALL_BODY_LENGTH, WALL_BODY_HEIGHT)));
+        let wall_collider = ColliderDesc::new(wall_shape);
+
+        let mut rb_desc = RigidBodyDesc::new()
+            .position(Isometry2::translation(TOP_WALL_X_POSITION, TOP_WALL_Y_POSITION))
+            .status(BodyStatus::Static)
+            .collider(&wall_collider);
+
+        rb_desc.build(&mut self.world);
+
+        rb_desc.position(Isometry2::translation(BOTTOM_WALL_X_POSITION, BOTTOM_WALL_Y_POSITION)).build(&mut self.world);
+    }
+
+    fn render_walls<G> (&self, context: Context, graphics: &mut G)
+    where G: Graphics {
+        let empty_transform = context.transform.trans(0.0, 0.0);
+        let rectangle = Rectangle::new(BLACK);
+        rectangle.draw(
+            [TOP_WALL_X_POSITION, TOP_WALL_Y_POSITION, WALL_DRAW_LENGTH, WALL_DRAW_HEIGHT],
+            &context.draw_state,
+            empty_transform,
+            graphics
+        );
+        rectangle.draw(
+            [BOTTOM_WALL_X_POSITION, BOTTOM_WALL_Y_POSITION, WALL_DRAW_LENGTH, WALL_DRAW_HEIGHT],
+            &context.draw_state,
+            empty_transform,
+            graphics
+        );
     }
 }
