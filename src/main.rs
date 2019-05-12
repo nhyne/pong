@@ -8,7 +8,7 @@ use piston_window::*;
 use math::Matrix2d;
 
 use nalgebra::{Point2, Vector2, Isometry2};
-use ncollide2d::shape::{Ball, ShapeHandle};
+use ncollide2d::shape::{Ball, ShapeHandle, Cuboid};
 use nphysics2d::object::{ColliderDesc, RigidBodyDesc, BodyHandle};
 use nphysics2d::world::World;
 use nphysics2d::algebra::Velocity2;
@@ -22,6 +22,7 @@ const BALL_SIZE: f64 = 20.0;
 struct Game {
     world: World<f64>,
     ball: Vec<PongBall>,
+    players: Vec<PongPlayer>,
 }
 
 impl Game {
@@ -30,6 +31,7 @@ impl Game {
         Game {
             world,
             ball: Vec::with_capacity(1),
+            players: Vec::with_capacity(2),
         }
     }
 
@@ -46,6 +48,31 @@ impl Game {
 
         let ball = PongBall::new(ball_handle);
         self.ball.push(ball);
+
+        let player_shape = ShapeHandle::new(Cuboid::new(Vector2::repeat(3.0)));
+        let player_collider = ColliderDesc::new(player_shape);
+        let mut player_one_rb_desc = RigidBodyDesc::new()
+            .collider(&player_collider);
+
+        let mut player_two_rb_desc = RigidBodyDesc::new()
+            .collider(&player_collider);
+
+        let player_one_rigid_body = player_one_rb_desc
+            .position(Isometry2::translation(100.0, 100.0))
+            .build(&mut self.world);
+        let player_one_handle = player_one_rigid_body.handle();
+
+        let player_two_rigid_body = player_two_rb_desc
+            .position(Isometry2::translation(300.0, 300.0))
+            .build(&mut self.world);
+        let player_two_handle = player_two_rigid_body.handle();
+
+        let player_one = PongPlayer::new(player_one_handle);
+        let player_two = PongPlayer::new(player_two_handle);
+
+        self.players.push(player_one);
+        self.players.push(player_two);
+
     }
 
     fn update(&mut self) {
@@ -58,41 +85,52 @@ impl Game {
         graphics.clear_stencil(0);
 
         self.ball[0].render(context, graphics, &self.world);
+
+        for player in &self.players {
+            player.render(context, graphics, &self.world);
+        }
+
     }
 }
 
-struct Player {
-    x_pos: f64,
-    y_pos: f64,
+struct PongPlayer {
     shape: Rectangle,
+    body: BodyHandle,
 }
 
-impl Player {
-    fn render<G>(&self, draw_state: &DrawState, transform: Matrix2d, graphics: &mut G)
-        where G: Graphics {
-            self.shape.draw(
-                [self.x_pos, self.y_pos, PLAYER_WIDTH, PLAYER_HEIGHT],
-                draw_state,
-                transform,
-                graphics,
-            )
+impl PongPlayer {
+    fn render<G>(&self, context: Context, graphics: &mut G, world: &World<f64>)
+    where G: Graphics {
+        let player_body = world.rigid_body(self.body);
+        match player_body {
+            None => {},
+            Some(b) => {
+                let player_body = b.borrow();
+                let pos = player_body.position().translation.vector;
+                self.shape.draw(
+                    [pos[0], pos[1], PLAYER_WIDTH, PLAYER_HEIGHT],
+                    &context.draw_state,
+                    context.transform,
+                    graphics,
+                )
+            }
         }
+    }
 
-    fn new(x_pos: f64, y_pos: f64) -> Player {
-        Player {
-            x_pos,
-            y_pos,
+    fn new(body: BodyHandle) -> PongPlayer {
+        PongPlayer {
+            body,
             shape: Rectangle::new(BLACK),
         }
     }
 
-    fn move_up(&mut self) {
-        self.y_pos += 5.0;
-    }
+    //fn move_up(&mut self) {
+    //    self.y_pos += 5.0;
+    //}
 
-    fn move_down(&mut self) {
-        self.y_pos -= 5.0;
-    }
+    //fn move_down(&mut self) {
+    //    self.y_pos -= 5.0;
+    //}
 }
 
 struct PongBall {
@@ -109,7 +147,7 @@ impl PongBall {
     }
 
     fn render<G> (&self, context: Context, graphics: &mut G, world: &World<f64>)
-        where G: Graphics {
+    where G: Graphics {
         let body = world.rigid_body(self.body);
         match body {
             None => {},
