@@ -1,7 +1,7 @@
 mod game;
 
-extern crate piston_window;
 extern crate find_folder;
+extern crate piston_window;
 
 use piston_window::*;
 
@@ -9,10 +9,7 @@ fn main() {
     let mut game = game::Game::new();
     game.init();
 
-    let mut window: PistonWindow = WindowSettings::new(
-        "piston: draw_state",
-        [800, 420]
-    )
+    let mut window: PistonWindow = WindowSettings::new("piston: draw_state", [800, 420])
         .exit_on_esc(true)
         .samples(4)
         .build()
@@ -40,6 +37,5 @@ fn main() {
         window.draw_2d(&e, |context, graphics| {
             game.render(context, graphics);
         });
-
     }
 }
