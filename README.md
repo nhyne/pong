@@ -20,5 +20,5 @@ The pong ball creates a custom material type in nphysics so that it does not los
 ### TODO
 - [ ] Player input
 - [ ] Scoring
-- [ ] Boundaries
-- [ ] Split the structs into their own files/modules
+- [x] Boundaries
+- [x] Split the structs into their own files/modules
