@@ -39,7 +39,7 @@ impl Game {
 
         let mut rb_desc = RigidBodyDesc::new()
             .collider(&ball_collider)
-            .velocity(Velocity2::linear(0.05, 0.0));
+            .velocity(Velocity2::linear(3.0, 2.0));
 
         let rigid_body = rb_desc.build(&mut self.world);
         let ball_handle = rigid_body.handle();
@@ -57,7 +57,7 @@ impl Game {
         clear([0.8, 0.8, 0.8, 1.0], graphics);
         graphics.clear_stencil(0);
 
-        self.ball[0].draw(context, graphics, &self.world);
+        self.ball[0].render(context, graphics, &self.world);
     }
 }
 
@@ -68,7 +68,7 @@ struct Player {
 }
 
 impl Player {
-    fn draw<G>(&self, draw_state: &DrawState, transform: Matrix2d, graphics: &mut G)
+    fn render<G>(&self, draw_state: &DrawState, transform: Matrix2d, graphics: &mut G)
         where G: Graphics {
             self.shape.draw(
                 [self.x_pos, self.y_pos, PLAYER_WIDTH, PLAYER_HEIGHT],
@@ -108,7 +108,7 @@ impl PongBall {
         }
     }
 
-    fn draw<G> (&self, context: Context, graphics: &mut G, world: &World<f64>)
+    fn render<G> (&self, context: Context, graphics: &mut G, world: &World<f64>)
         where G: Graphics {
         let body = world.rigid_body(self.body);
         match body {
