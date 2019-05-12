@@ -45,7 +45,32 @@ impl Game {
     }
 
     pub fn init(&mut self) {
-        //TODO Write a ball init function specifically
+        self.init_ball();
+
+        self.init_players();
+
+        self.init_walls();
+    }
+
+    pub fn update(&mut self) {
+        self.world.step();
+    }
+
+    pub fn render<G> (&self, context: Context, graphics: &mut G)
+    where G: Graphics {
+        clear([0.8, 0.8, 0.8, 1.0], graphics);
+        graphics.clear_stencil(0);
+
+        self.ball[0].render(context, graphics, &self.world);
+
+        for player in &self.players {
+            player.render(context, graphics, &self.world);
+        }
+
+        self.render_walls(context, graphics)
+    }
+
+    fn init_ball(&mut self) {
         let ball_shape = ShapeHandle::new(Ball::new(ball::BALL_SIZE));
         let ball_collider = ColliderDesc::new(ball_shape)
             .density(1.0)
@@ -61,8 +86,9 @@ impl Game {
 
         let ball = ball::PongBall::new(ball_handle);
         self.ball.push(ball);
+    }
 
-        //TODO Write a player init function specifically
+    fn init_players(&mut self) {
         let player_shape = ShapeHandle::new(Cuboid::new(Vector2::repeat(3.0)));
         let player_collider = ColliderDesc::new(player_shape);
         let player_one_rb_desc = RigidBodyDesc::new()
@@ -88,26 +114,6 @@ impl Game {
 
         self.players.push(player_one);
         self.players.push(player_two);
-
-        self.init_walls();
-    }
-
-    pub fn update(&mut self) {
-        self.world.step();
-    }
-
-    pub fn render<G> (&self, context: Context, graphics: &mut G)
-    where G: Graphics {
-        clear([0.8, 0.8, 0.8, 1.0], graphics);
-        graphics.clear_stencil(0);
-
-        self.ball[0].render(context, graphics, &self.world);
-
-        for player in &self.players {
-            player.render(context, graphics, &self.world);
-        }
-
-        self.render_walls(context, graphics)
     }
 
     fn init_walls(&mut self) {
