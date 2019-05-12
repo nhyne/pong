@@ -19,7 +19,7 @@ const BLACK: [f32;4] = [0.0, 0.0, 0.0, 1.0];
 
 const WALL_DRAW_LENGTH: f64 = 800.0;
 const WALL_DRAW_HEIGHT: f64 = 20.0;
-const WALL_BODY_LENGTH: f64 = 400.0;
+const WALL_BODY_LENGTH: f64 = 800.0;
 const WALL_BODY_HEIGHT: f64 = 0.5;
 
 const TOP_WALL_X_POSITION: f64 = 0.0;
@@ -89,7 +89,7 @@ impl Game {
     }
 
     fn init_players(&mut self) {
-        let player_shape = ShapeHandle::new(Cuboid::new(Vector2::repeat(3.0)));
+        let player_shape = ShapeHandle::new(Cuboid::new(Vector2::new(7.5, 25.0)));
         let player_collider = ColliderDesc::new(player_shape);
         let player_one_rb_desc = RigidBodyDesc::new()
             .collider(&player_collider);
@@ -98,13 +98,13 @@ impl Game {
             .collider(&player_collider);
 
         let player_one_rigid_body = player_one_rb_desc
-            .position(Isometry2::translation(100.0, 100.0))
+            .position(Isometry2::translation(50.0, 200.0))
             .status(BodyStatus::Kinematic)
             .build(&mut self.world);
         let player_one_handle = player_one_rigid_body.handle();
 
         let player_two_rigid_body = player_two_rb_desc
-            .position(Isometry2::translation(300.0, 200.0))
+            .position(Isometry2::translation(735.0, 300.0))
             .status(BodyStatus::Kinematic)
             .build(&mut self.world);
         let player_two_handle = player_two_rigid_body.handle();

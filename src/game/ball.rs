@@ -10,18 +10,18 @@ use core::borrow::Borrow;
 const BLACK: [f32;4] = [0.0, 0.0, 0.0, 1.0];
 
 pub const BALL_SIZE: f64 = 20.0;
-pub const BALL_HORIZONTAL_SPEED: f64 = 12.0;
-pub const BALL_VERTICAL_SPEED: f64 = 8.0;
+pub const BALL_HORIZONTAL_SPEED: f64 = 18.0;
+pub const BALL_VERTICAL_SPEED: f64 = 10.0;
 
 pub struct PongBall {
-    shape: Rectangle,
+    shape: Ellipse,
     body: BodyHandle,
 }
 
 impl PongBall {
     pub fn new(body: BodyHandle) -> PongBall {
         PongBall {
-            shape: Rectangle::new(BLACK),
+            shape: Ellipse::new(BLACK),
             body,
         }
     }
