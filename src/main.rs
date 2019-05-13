@@ -17,20 +17,9 @@ fn main() {
 
     while let Some(e) = window.next() {
         // TODO Make these functions async because they're blocking
-        //if let Some(Button::Keyboard(Key::A)) = e.press_args() {
-        //    player_1.move_down(&mut game.world)
-        //}
-
-        //if let Some(Button::Keyboard(Key::S)) = e.press_args() {
-        //    player_1.move_up(&mut game.world)
-        //}
-
-        //if let Some(Button::Keyboard(Key::K)) = e.press_args() {
-        //    player_2.move_up()
-        //}
-        //if let Some(Button::Keyboard(Key::L)) = e.press_args() {
-        //    player_2.move_down()
-        //}
+        if let Some(Button::Keyboard(key)) = e.press_args() {
+            game.handle_key_press(&key);
+        }
 
         game.update();
 

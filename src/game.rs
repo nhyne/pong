@@ -29,6 +29,7 @@ const BOTTOM_WALL_Y_POSITION: f64 = 400.0;
 
 pub struct Game {
     world: World<f64>,
+    //TODO these really don't need to be Vecs
     ball: Vec<ball::PongBall>,
     players: Vec<player::PongPlayer>,
 }
@@ -53,6 +54,24 @@ impl Game {
 
     pub fn update(&mut self) {
         self.world.step();
+    }
+
+    pub fn handle_key_press(&mut self, key: &Key) {
+        match key {
+            &Key::W => {
+                self.players[0].move_up(&mut self.world)
+            },
+            &Key::S => {
+                self.players[0].move_down(&mut self.world)
+            },
+            &Key::Up => {
+                self.players[1].move_up(&mut self.world)
+            },
+            &Key::Down => {
+                self.players[1].move_down(&mut self.world)
+            },
+            _ => {},
+        }
     }
 
     pub fn render<G>(&self, context: Context, graphics: &mut G)

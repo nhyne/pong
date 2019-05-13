@@ -53,7 +53,7 @@ impl PongPlayer {
                 let player_body = b.borrow_mut();
                 let current_pos = player_body.position().translation.vector;
                 player_body
-                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] + 5.0))
+                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] - 5.0))
             }
         }
     }
@@ -66,7 +66,7 @@ impl PongPlayer {
                 let player_body = b.borrow_mut();
                 let current_pos = player_body.position().translation.vector;
                 player_body
-                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] - 5.0))
+                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] + 5.0))
             }
         }
     }
