@@ -17,18 +17,18 @@ use nphysics2d::world::World;
 
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
-const WALL_DRAW_LENGTH: f64 = 800.0;
-const WALL_DRAW_HEIGHT: f64 = 20.0;
-const WALL_BODY_LENGTH: f64 = 800.0;
-const WALL_BODY_HEIGHT: f64 = 0.5;
+const WALL_DRAW_LENGTH: i32 = 800;
+const WALL_DRAW_HEIGHT: i32 = 20;
+const WALL_BODY_LENGTH: i32 = 800;
+const WALL_BODY_HEIGHT: i32 = 1;
 
-const TOP_WALL_X_POSITION: f64 = 0.0;
-const TOP_WALL_Y_POSITION: f64 = 0.0;
-const BOTTOM_WALL_X_POSITION: f64 = 0.0;
-const BOTTOM_WALL_Y_POSITION: f64 = 400.0;
+const TOP_WALL_X_POSITION: i32 = 0;
+const TOP_WALL_Y_POSITION: i32 = 0;
+const BOTTOM_WALL_X_POSITION: i32 = 0;
+const BOTTOM_WALL_Y_POSITION: i32 = 400;
 
 pub struct Game {
-    world: World<f64>,
+    pub world: World<f32>,
     //TODO these really don't need to be Vecs
     ball: Vec<ball::PongBall>,
     players: Vec<player::PongPlayer>,
@@ -36,7 +36,7 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Game {
-        let world: World<f64> = World::new();
+        let world: World<f32> = World::new();
         Game {
             world,
             ball: Vec::with_capacity(1),
@@ -94,11 +94,11 @@ impl Game {
         let ball_shape = ShapeHandle::new(Ball::new(ball::BALL_SIZE));
         let ball_collider = ColliderDesc::new(ball_shape)
             .density(1.0)
-            .material(MaterialHandle::new(BasicMaterial::new(2.0, 0.0)));
+            .material(MaterialHandle::new(BasicMaterial::new(2.0_f32, 0.0_f32)));
 
         let mut rb_desc = RigidBodyDesc::new()
             .collider(&ball_collider)
-            .position(Isometry2::translation(50.0, 50.0))
+            .position(Isometry2::translation(50.0_f32, 50.0_f32))
             .velocity(Velocity2::linear(
                 ball::BALL_HORIZONTAL_SPEED,
                 ball::BALL_VERTICAL_SPEED,
@@ -112,20 +112,20 @@ impl Game {
     }
 
     fn init_players(&mut self) {
-        let player_shape = ShapeHandle::new(Cuboid::new(Vector2::new(7.5, 25.0)));
+        let player_shape = ShapeHandle::new(Cuboid::new(Vector2::new(7.5_f32, 25.0_f32)));
         let player_collider = ColliderDesc::new(player_shape);
         let player_one_rb_desc = RigidBodyDesc::new().collider(&player_collider);
 
         let player_two_rb_desc = RigidBodyDesc::new().collider(&player_collider);
 
         let player_one_rigid_body = player_one_rb_desc
-            .position(Isometry2::translation(50.0, 200.0))
+            .position(Isometry2::translation(50.0_f32, 200.0_f32))
             .status(BodyStatus::Kinematic)
             .build(&mut self.world);
         let player_one_handle = player_one_rigid_body.handle();
 
         let player_two_rigid_body = player_two_rb_desc
-            .position(Isometry2::translation(735.0, 300.0))
+            .position(Isometry2::translation(735.0_f32, 300.0_f32))
             .status(BodyStatus::Kinematic)
             .build(&mut self.world);
         let player_two_handle = player_two_rigid_body.handle();

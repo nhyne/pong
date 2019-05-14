@@ -9,8 +9,8 @@ use nphysics2d::object::BodyHandle;
 use nphysics2d::world::World;
 
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-const PLAYER_WIDTH: f64 = 15.0;
-const PLAYER_HEIGHT: f64 = 50.0;
+const PLAYER_WIDTH: f32 = 15.0;
+const PLAYER_HEIGHT: f32 = 50.0;
 
 pub struct PongPlayer {
     pub shape: Rectangle,
@@ -18,7 +18,7 @@ pub struct PongPlayer {
 }
 
 impl PongPlayer {
-    pub fn render<G>(&self, context: Context, graphics: &mut G, world: &World<f64>)
+    pub fn render<G>(&self, context: Context, graphics: &mut G, world: &World<f32>)
     where
         G: Graphics,
     {
@@ -45,7 +45,7 @@ impl PongPlayer {
         }
     }
 
-    pub fn move_up(&mut self, world: &mut World<f64>) {
+    pub fn move_up(&mut self, world: &mut World<f32>) {
         let player_body = world.rigid_body_mut(self.body);
         match player_body {
             None => {}
@@ -53,12 +53,12 @@ impl PongPlayer {
                 let player_body = b.borrow_mut();
                 let current_pos = player_body.position().translation.vector;
                 player_body
-                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] - 5.0))
+                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] - 5.0_f32))
             }
         }
     }
 
-    pub fn move_down(&mut self, world: &mut World<f64>) {
+    pub fn move_down(&mut self, world: &mut World<f32>) {
         let player_body = world.rigid_body_mut(self.body);
         match player_body {
             None => {}
@@ -66,7 +66,7 @@ impl PongPlayer {
                 let player_body = b.borrow_mut();
                 let current_pos = player_body.position().translation.vector;
                 player_body
-                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] + 5.0))
+                    .set_position(Isometry2::translation(current_pos[0], current_pos[1] + 5.0_f32))
             }
         }
     }

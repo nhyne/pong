@@ -9,9 +9,9 @@ use nphysics2d::world::World;
 
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
-pub const BALL_SIZE: f64 = 20.0;
-pub const BALL_HORIZONTAL_SPEED: f64 = 18.0;
-pub const BALL_VERTICAL_SPEED: f64 = 10.0;
+pub const BALL_SIZE: f32 = 20.0;
+pub const BALL_HORIZONTAL_SPEED: f32 = 18.0;
+pub const BALL_VERTICAL_SPEED: f32 = 10.0;
 
 pub struct PongBall {
     shape: Ellipse,
@@ -26,7 +26,7 @@ impl PongBall {
         }
     }
 
-    pub fn render<G>(&self, context: Context, graphics: &mut G, world: &World<f64>)
+    pub fn render<G>(&self, context: Context, graphics: &mut G, world: &World<f32>)
     where
         G: Graphics,
     {
