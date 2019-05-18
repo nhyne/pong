@@ -29,7 +29,6 @@ const BOTTOM_WALL_Y_POSITION: f64 = 400.0;
 
 pub struct Game {
     world: World<f64>,
-    //TODO these really don't need to be Vecs
     ball: ball::PongBall,
     player_one: player::PongPlayer,
     player_two: player::PongPlayer,
