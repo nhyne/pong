@@ -88,6 +88,8 @@ impl Game {
         self.render_walls(context, graphics)
     }
 
+    // TODO It seems like the world knows a little too much about the ball
+    //   and the material it is constructed out of
     fn init_ball(world: &mut World<f64>) -> ball::PongBall {
         let ball_shape = ShapeHandle::new(Ball::new(ball::BALL_SIZE));
         let ball_collider = ColliderDesc::new(ball_shape)
@@ -110,7 +112,8 @@ impl Game {
 
     fn init_player(world: &mut World<f64>, position: (f64, f64)) -> player::PongPlayer {
         let player_shape = ShapeHandle::new(Cuboid::new(Vector2::new(7.5, 25.0)));
-        let player_collider = ColliderDesc::new(player_shape);
+        let player_collider = ColliderDesc::new(player_shape)
+            .material(MaterialHandle::new(BasicMaterial::new(0.0, 0.0)));
         let player_rb_desc = RigidBodyDesc::new().collider(&player_collider);
 
         let player_rigid_body = player_rb_desc
@@ -127,7 +130,8 @@ impl Game {
             WALL_BODY_LENGTH,
             WALL_BODY_HEIGHT,
         )));
-        let wall_collider = ColliderDesc::new(wall_shape);
+        let wall_collider = ColliderDesc::new(wall_shape)
+            .material(MaterialHandle::new(BasicMaterial::new(0.0, 0.0)));
 
         let mut rb_desc = RigidBodyDesc::new()
             .position(Isometry2::translation(
