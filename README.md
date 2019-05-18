@@ -19,6 +19,7 @@ The pong ball creates a custom material type in nphysics so that it does not los
 ---
 ### TODO
 - [ ] Player input
+    * specifically the player inputs need to be async b/c they're currently blocking
 - [ ] Scoring
 - [x] Boundaries
 - [x] Split the structs into their own files/modules
