@@ -30,26 +30,26 @@ const BOTTOM_WALL_Y_POSITION: f64 = 400.0;
 pub struct Game {
     world: World<f64>,
     //TODO these really don't need to be Vecs
-    ball: Vec<ball::PongBall>,
-    players: Vec<player::PongPlayer>,
+    ball: ball::PongBall,
+    player_one: player::PongPlayer,
+    player_two: player::PongPlayer,
 }
 
 impl Game {
     pub fn new() -> Game {
-        let world: World<f64> = World::new();
+        let mut world: World<f64> = World::new();
+
+        let ball = Game::init_ball(&mut world);
+        let player_one = Game::init_player(&mut world, (50.0, 200.0));
+        let player_two = Game::init_player(&mut world, (735.0, 300.0));
+        Game::init_walls(&mut world);
+
         Game {
             world,
-            ball: Vec::with_capacity(1),
-            players: Vec::with_capacity(2),
+            ball,
+            player_one,
+            player_two,
         }
-    }
-
-    pub fn init(&mut self) {
-        self.init_ball();
-
-        self.init_players();
-
-        self.init_walls();
     }
 
     pub fn update(&mut self) {
@@ -59,16 +59,16 @@ impl Game {
     pub fn handle_key_press(&mut self, key: &Key) {
         match key {
             &Key::W => {
-                self.players[0].move_up(&mut self.world)
+                self.player_one.move_up(&mut self.world)
             },
             &Key::S => {
-                self.players[0].move_down(&mut self.world)
+                self.player_one.move_down(&mut self.world)
             },
             &Key::Up => {
-                self.players[1].move_up(&mut self.world)
+                self.player_two.move_up(&mut self.world)
             },
             &Key::Down => {
-                self.players[1].move_down(&mut self.world)
+                self.player_two.move_down(&mut self.world)
             },
             _ => {},
         }
@@ -81,16 +81,15 @@ impl Game {
         clear([0.8, 0.8, 0.8, 1.0], graphics);
         graphics.clear_stencil(0);
 
-        self.ball[0].render(context, graphics, &self.world);
+        self.ball.render(context, graphics, &self.world);
 
-        for player in &self.players {
-            player.render(context, graphics, &self.world);
-        }
+        self.player_one.render(context, graphics, &self.world);
+        self.player_two.render(context, graphics, &self.world);
 
         self.render_walls(context, graphics)
     }
 
-    fn init_ball(&mut self) {
+    fn init_ball(world: &mut World<f64>) -> ball::PongBall {
         let ball_shape = ShapeHandle::new(Ball::new(ball::BALL_SIZE));
         let ball_collider = ColliderDesc::new(ball_shape)
             .density(1.0)
@@ -104,40 +103,27 @@ impl Game {
                 ball::BALL_VERTICAL_SPEED,
             ));
 
-        let rigid_body = rb_desc.build(&mut self.world);
+        let rigid_body = rb_desc.build(world);
         let ball_handle = rigid_body.handle();
 
-        let ball = ball::PongBall::new(ball_handle);
-        self.ball.push(ball);
+        ball::PongBall::new(ball_handle)
     }
 
-    fn init_players(&mut self) {
+    fn init_player(world: &mut World<f64>, position: (f64, f64)) -> player::PongPlayer {
         let player_shape = ShapeHandle::new(Cuboid::new(Vector2::new(7.5, 25.0)));
         let player_collider = ColliderDesc::new(player_shape);
-        let player_one_rb_desc = RigidBodyDesc::new().collider(&player_collider);
+        let player_rb_desc = RigidBodyDesc::new().collider(&player_collider);
 
-        let player_two_rb_desc = RigidBodyDesc::new().collider(&player_collider);
-
-        let player_one_rigid_body = player_one_rb_desc
-            .position(Isometry2::translation(50.0, 200.0))
+        let player_rigid_body = player_rb_desc
+            .position(Isometry2::translation(position.0, position.1))
             .status(BodyStatus::Kinematic)
-            .build(&mut self.world);
-        let player_one_handle = player_one_rigid_body.handle();
+            .build(world);
+        let player_handle = player_rigid_body.handle();
 
-        let player_two_rigid_body = player_two_rb_desc
-            .position(Isometry2::translation(735.0, 300.0))
-            .status(BodyStatus::Kinematic)
-            .build(&mut self.world);
-        let player_two_handle = player_two_rigid_body.handle();
-
-        let player_one = player::PongPlayer::new(player_one_handle);
-        let player_two = player::PongPlayer::new(player_two_handle);
-
-        self.players.push(player_one);
-        self.players.push(player_two);
+        player::PongPlayer::new(player_handle)
     }
 
-    fn init_walls(&mut self) {
+    fn init_walls(world: &mut World<f64>) {
         let wall_shape = ShapeHandle::new(Cuboid::new(Vector2::new(
             WALL_BODY_LENGTH,
             WALL_BODY_HEIGHT,
@@ -152,14 +138,14 @@ impl Game {
             .status(BodyStatus::Static)
             .collider(&wall_collider);
 
-        rb_desc.build(&mut self.world);
+        rb_desc.build(world);
 
         rb_desc
             .position(Isometry2::translation(
                 BOTTOM_WALL_X_POSITION,
                 BOTTOM_WALL_Y_POSITION,
             ))
-            .build(&mut self.world);
+            .build(world);
     }
 
     fn render_walls<G>(&self, context: Context, graphics: &mut G)

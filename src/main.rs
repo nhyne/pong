@@ -7,7 +7,6 @@ use piston_window::*;
 
 fn main() {
     let mut game = game::Game::new();
-    game.init();
 
     let mut window: PistonWindow = WindowSettings::new("piston: draw_state", [800, 420])
         .exit_on_esc(true)
