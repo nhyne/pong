@@ -15,7 +15,6 @@ fn main() {
         .unwrap();
 
     while let Some(e) = window.next() {
-        // TODO Make these functions async because they're blocking
         if let Some(Button::Keyboard(key)) = e.press_args() {
             game.handle_key_press(&key);
         }

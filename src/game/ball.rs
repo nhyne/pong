@@ -26,10 +26,7 @@ impl PongBall {
         }
     }
 
-    pub fn render<G>(&self, context: Context, graphics: &mut G, world: &World<f64>)
-    where
-        G: Graphics,
-    {
+    pub fn render<G: Graphics>(&self, context: Context, graphics: &mut G, world: &World<f64>) {
         let body = world.rigid_body(self.body);
         match body {
             None => {}

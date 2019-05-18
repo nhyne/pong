@@ -18,10 +18,7 @@ pub struct PongPlayer {
 }
 
 impl PongPlayer {
-    pub fn render<G>(&self, context: Context, graphics: &mut G, world: &World<f64>)
-    where
-        G: Graphics,
-    {
+    pub fn render<G: Graphics>(&self, context: Context, graphics: &mut G, world: &World<f64>) {
         let player_body = world.rigid_body(self.body);
         match player_body {
             None => {}

@@ -56,27 +56,17 @@ impl Game {
     }
 
     pub fn handle_key_press(&mut self, key: &Key) {
+        // TODO Make these functions async because they're blocking
         match key {
-            &Key::W => {
-                self.player_one.move_up(&mut self.world)
-            },
-            &Key::S => {
-                self.player_one.move_down(&mut self.world)
-            },
-            &Key::Up => {
-                self.player_two.move_up(&mut self.world)
-            },
-            &Key::Down => {
-                self.player_two.move_down(&mut self.world)
-            },
-            _ => {},
+            &Key::W => self.player_one.move_up(&mut self.world),
+            &Key::S => self.player_one.move_down(&mut self.world),
+            &Key::Up => self.player_two.move_up(&mut self.world),
+            &Key::Down => self.player_two.move_down(&mut self.world),
+            _ => {}
         }
     }
 
-    pub fn render<G>(&self, context: Context, graphics: &mut G)
-    where
-        G: Graphics,
-    {
+    pub fn render<G: Graphics>(&self, context: Context, graphics: &mut G) {
         clear([0.8, 0.8, 0.8, 1.0], graphics);
         graphics.clear_stencil(0);
 
