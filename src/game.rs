@@ -141,10 +141,7 @@ impl Game {
             .build(world);
     }
 
-    fn render_walls<G>(&self, context: Context, graphics: &mut G)
-    where
-        G: Graphics,
-    {
+    fn render_walls<G: Graphics>(&self, context: Context, graphics: &mut G) {
         let empty_transform = context.transform.trans(0.0, 0.0);
         let rectangle = Rectangle::new(BLACK);
         rectangle.draw(
