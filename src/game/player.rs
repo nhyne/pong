@@ -7,6 +7,7 @@ use core::borrow::{Borrow, BorrowMut};
 use nalgebra::Isometry2;
 use nphysics2d::object::BodyHandle;
 use nphysics2d::world::World;
+use std::collections::HashSet;
 
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 const PLAYER_WIDTH: f64 = 15.0;
@@ -16,6 +17,8 @@ pub const PLAYER_SPEED: f64 = 5.0;
 pub struct PongPlayer {
     pub shape: Rectangle,
     pub body: BodyHandle,
+    pub up_key: Key,
+    pub down_key: Key,
 }
 
 impl PongPlayer {
@@ -36,12 +39,35 @@ impl PongPlayer {
         }
     }
 
-    pub fn new(body: BodyHandle) -> PongPlayer {
+    pub fn new(body: BodyHandle, up_key: Key, down_key: Key) -> PongPlayer {
         PongPlayer {
             body,
             shape: Rectangle::new(BLACK),
+            up_key,
+            down_key,
         }
     }
+
+    pub fn update(&mut self, world: &mut World<f64>, keys_pressed: &HashSet<Key>) {
+        if keys_pressed.contains(&self.up_key) {
+            // set velocity -5
+            self.move_up(world);
+        }
+        if keys_pressed.contains(&self.down_key) {
+            // set velocity +5
+            self.move_down(world);
+        }
+    }
+
+    //pub fn change_velocity(&mut self, world: &mut World<f64>) {
+    //    let player_body = world.rigid_body_mut(self.body);
+    //    match player_body {
+    //        None => {},
+    //        Some(b) => {
+
+    //        }
+    //    }
+    //}
 
     pub fn move_up(&mut self, world: &mut World<f64>) {
         let player_body = world.rigid_body_mut(self.body);

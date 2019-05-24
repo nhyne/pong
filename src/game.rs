@@ -15,6 +15,8 @@ use nphysics2d::material::{BasicMaterial, MaterialHandle};
 use nphysics2d::object::{BodyStatus, ColliderDesc, RigidBodyDesc};
 use nphysics2d::world::World;
 
+use std::collections::HashSet;
+
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
 const WALL_DRAW_LENGTH: f64 = 800.0;
@@ -32,6 +34,7 @@ pub struct Game {
     ball: ball::PongBall,
     player_one: player::PongPlayer,
     player_two: player::PongPlayer,
+    keys_pressed: HashSet<piston_window::Key>,
 }
 
 impl Game {
@@ -39,8 +42,8 @@ impl Game {
         let mut world: World<f64> = World::new();
 
         let ball = Game::init_ball(&mut world);
-        let player_one = Game::init_player(&mut world, (50.0, 200.0));
-        let player_two = Game::init_player(&mut world, (735.0, 300.0));
+        let player_one = Game::init_player(&mut world, (50.0, 200.0), Key::W, Key::S);
+        let player_two = Game::init_player(&mut world, (735.0, 300.0), Key::Up, Key::Down);
         Game::init_walls(&mut world);
 
         Game {
@@ -48,10 +51,13 @@ impl Game {
             ball,
             player_one,
             player_two,
+            keys_pressed: HashSet::new(),
         }
     }
 
     pub fn update(&mut self) {
+        self.player_one.update(&mut self.world, &self.keys_pressed);
+        self.player_two.update(&mut self.world, &self.keys_pressed);
         self.world.step();
     }
 
@@ -63,6 +69,21 @@ impl Game {
             &Key::Up => self.player_two.move_up(&mut self.world),
             &Key::Down => self.player_two.move_down(&mut self.world),
             _ => {}
+        }
+    }
+
+    pub fn handle_keyboard_event(&mut self, key: ButtonArgs) {
+        match key.state {
+            ButtonState::Press => {
+                if let Button::Keyboard(key) = key.button {
+                    self.keys_pressed.insert(key);
+                }
+            }
+            ButtonState::Release => {
+                if let Button::Keyboard(key) = key.button {
+                    self.keys_pressed.remove(&key);
+                }
+            }
         }
     }
 
@@ -100,7 +121,12 @@ impl Game {
         ball::PongBall::new(ball_handle)
     }
 
-    fn init_player(world: &mut World<f64>, position: (f64, f64)) -> player::PongPlayer {
+    fn init_player(
+        world: &mut World<f64>,
+        position: (f64, f64),
+        up_key: Key,
+        down_key: Key,
+    ) -> player::PongPlayer {
         let player_shape = ShapeHandle::new(Cuboid::new(Vector2::new(7.5, 25.0)));
         let player_collider = ColliderDesc::new(player_shape)
             .material(MaterialHandle::new(BasicMaterial::new(0.0, 0.0)));
@@ -112,7 +138,7 @@ impl Game {
             .build(world);
         let player_handle = player_rigid_body.handle();
 
-        player::PongPlayer::new(player_handle)
+        player::PongPlayer::new(player_handle, up_key, down_key)
     }
 
     fn init_walls(world: &mut World<f64>) {

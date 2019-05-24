@@ -14,15 +14,26 @@ fn main() {
         .build()
         .unwrap();
 
-    while let Some(e) = window.next() {
-        if let Some(Button::Keyboard(key)) = e.press_args() {
-            game.handle_key_press(&key);
+    let mut events = Events::new(EventSettings::new());
+    while let Some(e) = events.next(&mut window) {
+        match e {
+            Event::Input(input_event) => {
+                //handle input events
+                match input_event {
+                    Input::Button(key) => game.handle_keyboard_event(key),
+                    _ => {}
+                }
+            }
+            Event::Loop(loop_event) => match loop_event {
+                Loop::Update(update_args) => game.update(),
+                Loop::Render(update_args) => {
+                    window.draw_2d(&e, |context, graphics| {
+                        game.render(context, graphics);
+                    });
+                }
+                _ => {}
+            },
+            _ => {}
         }
-
-        game.update();
-
-        window.draw_2d(&e, |context, graphics| {
-            game.render(context, graphics);
-        });
     }
 }
