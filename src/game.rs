@@ -34,6 +34,8 @@ pub struct Game {
     ball: ball::PongBall,
     player_one: player::PongPlayer,
     player_two: player::PongPlayer,
+    player_one_score: u8,
+    player_two_score: u8,
     keys_pressed: HashSet<piston_window::Key>,
 }
 
@@ -52,12 +54,16 @@ impl Game {
             player_one,
             player_two,
             keys_pressed: HashSet::new(),
+            player_one_score: 0,
+            player_two_score: 0,
         }
     }
 
     pub fn update(&mut self) {
         self.player_one.update(&mut self.world, &self.keys_pressed);
         self.player_two.update(&mut self.world, &self.keys_pressed);
+        self.check_goal();
+
         self.world.step();
     }
 
@@ -97,6 +103,25 @@ impl Game {
         self.player_two.render(context, graphics, &self.world);
 
         self.render_walls(context, graphics)
+    }
+
+    fn check_goal(&mut self) {
+        // check if ball X position is greater than 800 or less than 0
+        if let Some(ball_pos) = self.ball.get_position(&self.world) {
+            if ball_pos[0] > 800.0 {
+                self.player_one_score += 1;
+                self.reset_ball();
+            } else if ball_pos[0] < 0.0 {
+                self.player_two_score += 1;
+                self.reset_ball();
+            }
+        }
+    }
+
+    fn reset_ball(&mut self) {
+        // remove ball body
+        self.world.remove_bodies(&[self.ball.body]);
+        self.ball = Game::init_ball(&mut self.world);
     }
 
     // TODO It seems like the world knows a little too much about the ball

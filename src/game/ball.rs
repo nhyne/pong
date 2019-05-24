@@ -15,7 +15,7 @@ pub const BALL_VERTICAL_SPEED: f64 = 40.0;
 
 pub struct PongBall {
     shape: Ellipse,
-    body: BodyHandle,
+    pub body: BodyHandle,
 }
 
 impl PongBall {
@@ -40,6 +40,17 @@ impl PongBall {
                     graphics,
                 );
             }
+        }
+    }
+
+    pub fn get_position(&self, world: &World<f64>) -> Option<nalgebra::Vector2<f64>> {
+        let ball_body = world.rigid_body(self.body);
+        match ball_body {
+            None => None,
+            Some(b) => {
+                let ball_body = b.borrow();
+                Some(ball_body.position().translation.vector)
+            },
         }
     }
 }

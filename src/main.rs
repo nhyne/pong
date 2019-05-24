@@ -5,10 +5,13 @@ extern crate piston_window;
 
 use piston_window::*;
 
+const WORLD_WIDTH: f64 = 800.0;
+const WORLD_HEIGHT: f64 = 420.0;
+
 fn main() {
     let mut game = game::Game::new();
 
-    let mut window: PistonWindow = WindowSettings::new("piston: draw_state", [800, 420])
+    let mut window: PistonWindow = WindowSettings::new("piston: draw_state", [WORLD_WIDTH, WORLD_HEIGHT])
         .exit_on_esc(true)
         .samples(4)
         .build()
