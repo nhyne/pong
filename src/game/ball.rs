@@ -10,8 +10,8 @@ use nphysics2d::world::World;
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
 pub const BALL_SIZE: f64 = 20.0;
-pub const BALL_HORIZONTAL_SPEED: f64 = 152.0;
-pub const BALL_VERTICAL_SPEED: f64 = 80.0;
+pub const BALL_HORIZONTAL_SPEED: f64 = 300.0;
+pub const BALL_VERTICAL_SPEED: f64 = 160.0;
 
 pub struct PongBall {
     shape: Ellipse,
@@ -50,7 +50,7 @@ impl PongBall {
             Some(b) => {
                 let ball_body = b.borrow();
                 Some(ball_body.position().translation.vector)
-            },
+            }
         }
     }
 }

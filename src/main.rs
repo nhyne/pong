@@ -10,11 +10,12 @@ const WORLD_HEIGHT: f64 = 420.0;
 fn main() {
     let mut game = game::Game::new();
 
-    let mut window: PistonWindow = WindowSettings::new("piston: draw_state", [WORLD_WIDTH, WORLD_HEIGHT])
-        .exit_on_esc(true)
-        .samples(4)
-        .build()
-        .unwrap();
+    let mut window: PistonWindow =
+        WindowSettings::new("piston: draw_state", [WORLD_WIDTH, WORLD_HEIGHT])
+            .exit_on_esc(true)
+            .samples(4)
+            .build()
+            .unwrap();
 
     let mut events = Events::new(EventSettings::new().ups(60));
     while let Some(e) = events.next(&mut window) {
@@ -27,8 +28,8 @@ fn main() {
                 }
             }
             Event::Loop(loop_event) => match loop_event {
-                Loop::Update(update_args) => game.update(),
-                Loop::Render(update_args) => {
+                Loop::Update(_) => game.update(),
+                Loop::Render(_) => {
                     window.draw_2d(&e, |context, graphics| {
                         game.render(context, graphics);
                     });

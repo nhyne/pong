@@ -12,7 +12,7 @@ use nalgebra::{Isometry2, Vector2};
 use ncollide2d::shape::{Ball, Cuboid, ShapeHandle};
 use nphysics2d::algebra::Velocity2;
 use nphysics2d::material::{BasicMaterial, MaterialHandle};
-use nphysics2d::object::{BodyStatus, ColliderDesc, RigidBodyDesc};
+use nphysics2d::object::{BodyPartHandle, BodyStatus, ColliderDesc, RigidBodyDesc};
 use nphysics2d::world::World;
 
 use std::collections::HashSet;
@@ -67,17 +67,6 @@ impl Game {
         self.world.step();
     }
 
-    pub fn handle_key_press(&mut self, key: &Key) {
-        // TODO Make these functions async because they're blocking
-        match key {
-            &Key::W => self.player_one.move_up(&mut self.world),
-            &Key::S => self.player_one.move_down(&mut self.world),
-            &Key::Up => self.player_two.move_up(&mut self.world),
-            &Key::Down => self.player_two.move_down(&mut self.world),
-            _ => {}
-        }
-    }
-
     pub fn handle_keyboard_event(&mut self, key: ButtonArgs) {
         match key.state {
             ButtonState::Press => {
@@ -106,7 +95,6 @@ impl Game {
     }
 
     fn check_goal(&mut self) {
-        // check if ball X position is greater than 800 or less than 0
         if let Some(ball_pos) = self.ball.get_position(&self.world) {
             if ball_pos[0] > 800.0 {
                 self.player_one_score += 1;
@@ -119,7 +107,6 @@ impl Game {
     }
 
     fn reset_ball(&mut self) {
-        // remove ball body
         self.world.remove_bodies(&[self.ball.body]);
         self.ball = Game::init_ball(&mut self.world);
     }
@@ -171,25 +158,27 @@ impl Game {
             WALL_BODY_LENGTH,
             WALL_BODY_HEIGHT,
         )));
-        let wall_collider = ColliderDesc::new(wall_shape)
-            .material(MaterialHandle::new(BasicMaterial::new(0.0, 0.0)));
 
-        let mut rb_desc = RigidBodyDesc::new()
+        let wall_shape2 = ShapeHandle::new(Cuboid::new(Vector2::new(
+            WALL_BODY_LENGTH,
+            WALL_BODY_HEIGHT,
+        )));
+
+        ColliderDesc::new(wall_shape)
+            .material(MaterialHandle::new(BasicMaterial::new(0.0, 0.0)))
             .position(Isometry2::translation(
                 TOP_WALL_X_POSITION,
                 TOP_WALL_Y_POSITION,
             ))
-            .status(BodyStatus::Static)
-            .collider(&wall_collider);
+            .build_with_parent(BodyPartHandle::ground(), world);
 
-        rb_desc.build(world);
-
-        rb_desc
+        ColliderDesc::new(wall_shape2)
+            .material(MaterialHandle::new(BasicMaterial::new(0.0, 0.0)))
             .position(Isometry2::translation(
                 BOTTOM_WALL_X_POSITION,
                 BOTTOM_WALL_Y_POSITION,
             ))
-            .build(world);
+            .build_with_parent(BodyPartHandle::ground(), world);
     }
 
     fn render_walls<G: Graphics>(&self, context: Context, graphics: &mut G) {
