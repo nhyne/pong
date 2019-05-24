@@ -1,6 +1,5 @@
 mod game;
 
-extern crate find_folder;
 extern crate piston_window;
 
 use piston_window::*;
@@ -17,7 +16,7 @@ fn main() {
         .build()
         .unwrap();
 
-    let mut events = Events::new(EventSettings::new());
+    let mut events = Events::new(EventSettings::new().ups(60));
     while let Some(e) = events.next(&mut window) {
         match e {
             Event::Input(input_event) => {
