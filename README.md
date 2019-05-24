@@ -21,7 +21,9 @@ The pong ball creates a custom material type in nphysics so that it does not los
 - [x] Player input
     * specifically the player inputs need to be async b/c they're currently blocking
     - [ ] Player input now uses a HashSet to find the keys that are currently being pressed. This feels very hacky and gross. It looks like there is a set of event traits for buttons that I may be able to leverage for individual buttons in the [piston input](https://github.com/PistonDevelopers/piston/blob/V0.33.0/src/input/src/button.rs#L32) module.
-- [ ] Scoring
+- [x] Scoring
+    * Still need to show the score after a goal, and need to figure out when a player has won
 - [x] Boundaries
 - [x] Split the structs into their own files/modules
 - [ ] The Game knows too much about how to create the ball and player objects. Should split that logic out into the appropriate mods.
+- [ ] Need a menu to exit
